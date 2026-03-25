@@ -2,6 +2,8 @@ package spentenergy
 
 import (
 	"time"
+
+	"github.com/Yandex-Practicum/tracker/internal/errs"
 )
 
 // Основные константы, необходимые для расчетов.
@@ -13,17 +15,51 @@ const (
 )
 
 func WalkingSpentCalories(steps int, weight, height float64, duration time.Duration) (float64, error) {
-	// TODO: реализовать функцию
+	if err := errs.ValidateStep(steps); err != nil {
+		return 0, err
+	}
+	if err := errs.ValidateDuration(duration); err != nil {
+		return 0, err
+	}
+	if weight <= 0 {
+		return 0, errs.ErrInvalidWeight
+	}
+	if height <= 0 {
+		return 0, errs.ErrInvalidHeight
+	}
+	speedKmh := MeanSpeed(steps, height, duration)
+	calories := (walkingCaloriesCoefficient * weight * speedKmh * duration.Minutes()) / minInH
+	return calories, nil
 }
 
 func RunningSpentCalories(steps int, weight, height float64, duration time.Duration) (float64, error) {
-	// TODO: реализовать функцию
+	if err := errs.ValidateStep(steps); err != nil {
+		return 0, err
+	}
+	if err := errs.ValidateDuration(duration); err != nil {
+		return 0, err
+	}
+	if weight <= 0 {
+		return 0, errs.ErrInvalidWeight
+	}
+	if height <= 0 {
+		return 0, errs.ErrInvalidHeight
+	}
+	speedKmh := MeanSpeed(steps, height, duration)
+	calories := weight * speedKmh * duration.Minutes() / minInH
+	return calories, nil
 }
 
 func MeanSpeed(steps int, height float64, duration time.Duration) float64 {
-	// TODO: реализовать функцию
+	if duration <= 0 {
+		return 0
+	}
+	dist := Distance(steps, height)
+	speedKmh := dist / duration.Hours()
+	return speedKmh
 }
 
 func Distance(steps int, height float64) float64 {
-	// TODO: реализовать функцию
+	stepLength := height * stepLengthCoefficient
+	return float64(steps) * stepLength / mInKm
 }
